@@ -14,5 +14,3 @@ RUN curl -SL 'https://raw.githubusercontent.com/Winetricks/winetricks/master/src
 ENV XFB_SCREEN 1024x768x24
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN echo "alias winegui='wine explorer /desktop=DockerDesktop,1024x768'" > ~/.bash_aliases
-
-CMD ["/usr/bin/supervisord"]
