@@ -1,31 +1,18 @@
-FROM phusion/baseimage:0.9.16
-MAINTAINER archedraft
+FROM solarkennedy/wine-x11-novnc-docker
 
-# Set correct environment variables
-ENV HOME /root
-ENV DEBIAN_FRONTEND noninteractive
-ENV LC_ALL C.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
+# Install wine and related packages
+RUN dpkg --add-architecture i386 \
+&& apt-get update \
+&& apt-get install -y --no-install-recommends \
+wine \
+&& rm -rf /var/lib/apt/lists/*
 
-# Configure user nobody to match unRAID's settings
- RUN \
- usermod -u 99 nobody && \
- usermod -g 100 nobody && \
- usermod -d /config nobody && \
- chown -R nobody:users /home
+# Use the latest version of winetricks
+RUN curl -SL 'https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks' -o /usr/local/bin/winetricks \
+&& chmod +x /usr/local/bin/winetricks
 
-RUN apt-get update &&  apt-get -y install xvfb x11vnc xdotool wget supervisor
+ENV XFB_SCREEN 1024x768x24
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-ENV WINEPREFIX /root/prefix32
-ENV WINEARCH win32
-ENV DISPLAY :0
-
-WORKDIR /root/
-ADD novnc /root/novnc/
-
-# Expose Port
-EXPOSE 8080
+RUN echo "alias winegui='wine explorer /desktop=DockerDesktop,1024x768'" > ~/.bash_aliases
 
 CMD ["/usr/bin/supervisord"]
